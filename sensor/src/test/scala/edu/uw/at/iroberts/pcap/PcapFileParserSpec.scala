@@ -22,7 +22,9 @@ class PcapFileParserSpec(_system: ActorSystem) extends TestKit(_system) with Imp
   }
 
   implicit val materializer = ActorMaterializer()
-  val filePath = Paths.get("src/main/resources/http.cap")
+  val uri = getClass.getResource("/http.cap").toURI
+  val filePath = Paths.get(uri)
+  //val filePath = Paths.get("sensor/src/main/resources/http.cap")
 
   "A graph" should {
     "be able to sum the number of packets in http.cap" in {
@@ -70,8 +72,9 @@ class PcapFileParserSpec(_system: ActorSystem) extends TestKit(_system) with Imp
     }
     "be able to sum the number of payload bytes in nlmon-big.pcap," +
       " a big-endian capture file with linux netlink headers" in {
+      val uri = getClass.getResource("/nlmon-big.pcap").toURI
       val sumF: Future[Long] =
-        PcapFileParser.fromPath(Paths.get("src/main/resources/nlmon-big.pcap"))
+        PcapFileParser.fromPath(Paths.get(uri))
           .map { _.originalLength }
           .runWith(Sink.fold(0: Long)(_ + _))
 
