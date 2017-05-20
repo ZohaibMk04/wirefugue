@@ -1,22 +1,25 @@
-name := """wirefugue"""
+name := """wirefugue-sensor"""
 
-version := "1.0"
+organization := "edu.uw.at.iroberts"
 
-scalaVersion := "2.11.8"
+version := "0.0.1"
+
+scalaVersion := "2.12.2"
 
 libraryDependencies ++= {
 
-  val akkaVersion = "2.4.14"
+  val akkaVersion = "2.4.18"
 
   Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
 
-    "org.apache.kafka" % "kafka-clients" % "0.10.2.0",
+    "org.apache.kafka" % "kafka-clients" % "0.10.2.1",
+    "com.typesafe.akka" %% "akka-stream-kafka" % "0.16",
 
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
-    "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   )
 
 }
