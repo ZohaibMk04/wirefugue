@@ -6,8 +6,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{FileIO, Sink}
 import akka.testkit.{ImplicitSender, TestKit}
-import edu.uw.at.iroberts.pcap._
-import PcapFileRaw._
+import edu.uw.at.iroberts.pcap.PcapFileRaw._
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.concurrent.duration._
