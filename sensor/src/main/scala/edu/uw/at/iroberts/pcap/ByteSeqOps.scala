@@ -1,12 +1,17 @@
 package edu.uw.at.iroberts.pcap
 
 import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 
 /** Operations to extract from any IndexedSeq[Byte] (which includes
   * akka.util.ByteString), 32- and 16-bit integers, both
   * signed and unsigned, into Scala/Java's (always-signed) integer
   * types. Endianness may be specified implicitly.
+  *
+  * Overloaded object method toBytesBE() is provided to convert
+  * Int and Short values to Array[Byte] in network order.
   *
   * Also, an IndexedSeq[Byte] can be formatted into various
   * printable strings, notably a multiline display with offsets
@@ -28,6 +33,22 @@ object ByteSeqOps {
   def unsignedIntToSignedLong(u32: Int): Long = u32.toLong & 0xffffffff
   def unsignedShortToSignedInt(u16: Short): Int = u16.toInt & 0xffff
   def unsignedByteToSignedShort(u8: Byte): Short = (u8.toInt & 0xff).toShort
+
+  def toBytesBE(i32: Int): Array[Byte] = {
+    val buf: mutable.ArrayBuffer[Byte] = ArrayBuffer()
+    buf += (i32 >>> 24).toByte
+    buf += (i32 >>> 16).toByte
+    buf += (i32 >>> 8).toByte
+    buf += i32.toByte
+    buf.toArray
+  }
+
+  def toBytesBE(i16: Short): Array[Byte] = {
+    val buf: mutable.ArrayBuffer[Byte] = ArrayBuffer()
+    buf += (i16 >>> 8).toByte
+    buf += i16.toByte
+    buf.toArray
+  }
 }
 
 class ByteSeqOps[A <: IndexedSeq[Byte]](bytes: A) {
