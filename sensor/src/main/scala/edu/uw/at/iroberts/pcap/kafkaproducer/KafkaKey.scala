@@ -4,13 +4,26 @@ import edu.uw.at.iroberts.pcap.Protocol
 import edu.uw.at.iroberts.pcap.overlay.{IPV4Datagram, TCPSegment, UDPDatagram}
 import edu.uw.at.iroberts.pcap.ByteSeqOps._
 
+import org.apache.kafka.common.serialization.Serializer
+
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 5/22/17.
   */
 case class KafkaKey(n: Int) {
+  def serialize: Array[Byte] = toBytesBE(n)
 }
 
 object KafkaKey {
+  val serializer = new Serializer[KafkaKey] {
+    override def configure(configs: java.util.Map[String, _], isKey: Boolean) = {
+      /* Nothing to do */
+    }
+
+    override def close() = { /* Nothing to do */ }
+
+    override def serialize(topic: String, key: KafkaKey): Array[Byte] = key.serialize
+  }
+
   def fromIPV4Datagram(packet: IPV4Datagram): KafkaKey = {
     // TODO: Is this a good hashing method? Perform collision
     // analysis on real-world data...
