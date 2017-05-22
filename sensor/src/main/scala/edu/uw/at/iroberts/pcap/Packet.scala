@@ -7,7 +7,7 @@ import PcapFileRaw.LinkType
   * Created by Ian Robertson <iroberts@uw.edu> on 4/9/17.
   */
 
-/** UPacket represents
+/** Packet represents
   * all we care to know about a single pcap file record,
   * regardless of which file it came from.
   * The timestamp is always in UTC with nanosecond
@@ -15,8 +15,6 @@ import PcapFileRaw.LinkType
   * file header is included. includedLength is, well, not included
   * because that information can be obtained (in constant time)
   * from data.length.
-  *
-  * Think "User Packet", "Universal Packet", or "Useful Packet".
   */
 case class Packet(
                     timestamp: Instant,
