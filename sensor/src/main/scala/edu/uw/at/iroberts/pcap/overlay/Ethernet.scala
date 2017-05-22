@@ -29,6 +29,14 @@ case class IPV4Datagram[+Repr <: IndexedSeq[Byte]](bytes: Repr) extends Overlay 
   def src = IPAddress(bytes.slice(12, 16))
   def dest = IPAddress(bytes.slice(16, 20))
   def data: SeqView[Byte, IndexedSeq[Byte]] = bytes.view(ihl * 4, bytes.length)
+
+  override def toString = {
+
+    val protoStr = f"proto ${Protocol.fromByte(protocol).name} (0x$protocol%02x)"
+    val ttlSigned = ttl.toInt & 0xff
+
+    s"$src > $dest, IPv$version length $totalLength, ttl $ttlSigned, $protoStr [${data.length} bytes]"
+  }
 }
 
 object IPV4DatagramPartial extends Overlay {
