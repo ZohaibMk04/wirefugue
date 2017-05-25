@@ -7,8 +7,8 @@ import org.scalatest.{FlatSpec, Matchers}
   */
 class InternetChecksumSpec extends FlatSpec with Matchers {
   "onesSum()" should "work according to example in RFC 1071" in {
-    import akka.util.ByteString
     import InternetChecksum._
+    import akka.util.ByteString
 
     val data: IndexedSeq[Byte] = ByteString.fromInts(
       0x00, 0x01, 0xf2, 0x03,

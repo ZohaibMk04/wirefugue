@@ -1,13 +1,10 @@
 package edu.uw.at.iroberts.pcap.kafkaproducer
 
-import java.nio.ByteBuffer
 import java.util.Properties
 
 import akka.util.ByteString
 import edu.uw.at.iroberts.pcap.IPAddress
 import org.apache.kafka.clients.producer.{KafkaProducer, Producer, ProducerRecord}
-
-import scala.collection.immutable.Set.Set2
 
 /**
   * Created by scala on 5/12/17.

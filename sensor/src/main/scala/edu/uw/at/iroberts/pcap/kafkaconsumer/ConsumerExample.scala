@@ -10,9 +10,9 @@ import edu.uw.at.iroberts.pcap.kafkaproducer.KafkaKey
 import edu.uw.at.iroberts.pcap.overlay.IPV4Datagram
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 import org.apache.kafka.common.TopicPartition
-import org.apache.kafka.common.serialization.{ByteArrayDeserializer, StringDeserializer}
+import org.apache.kafka.common.serialization.ByteArrayDeserializer
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 /**

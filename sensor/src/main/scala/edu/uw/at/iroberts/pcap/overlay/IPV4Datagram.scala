@@ -1,7 +1,7 @@
 package edu.uw.at.iroberts.pcap.overlay
 
-import edu.uw.at.iroberts.pcap.{IPAddress, Protocol}
 import edu.uw.at.iroberts.pcap.ByteSeqOps._
+import edu.uw.at.iroberts.pcap.{IPAddress, Protocol}
 
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 5/22/17.

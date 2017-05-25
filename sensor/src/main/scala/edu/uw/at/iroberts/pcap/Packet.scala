@@ -1,8 +1,9 @@
 package edu.uw.at.iroberts.pcap
 
 import java.time.Instant
+
 import akka.util.ByteString
-import PcapFileRaw.LinkType
+import edu.uw.at.iroberts.pcap.PcapFileRaw.LinkType
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 4/9/17.
   */

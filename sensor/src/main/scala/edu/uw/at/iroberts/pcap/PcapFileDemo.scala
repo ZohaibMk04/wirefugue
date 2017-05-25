@@ -2,10 +2,9 @@ package edu.uw.at.iroberts.pcap
 
 import java.nio.file.Paths
 
-import akka.stream.scaladsl._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import edu.uw.at.iroberts.pcap.PcapFileRaw.RawPacket
+import akka.stream.scaladsl._
 
 /** Prints out the packets in http.cap
   *

@@ -1,7 +1,5 @@
 package edu.uw.at.iroberts.pcap
 
-import akka.util.ByteString
-
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 4/5/17.
   */

@@ -1,11 +1,9 @@
 package edu.uw.at.iroberts.pcap.kafkaproducer
 
-import java.util
-
+import edu.uw.at.iroberts.pcap.ByteSeqOps._
 import edu.uw.at.iroberts.pcap.Protocol
 import edu.uw.at.iroberts.pcap.overlay.{IPV4Datagram, TCPSegment, UDPDatagram}
-import edu.uw.at.iroberts.pcap.ByteSeqOps._
-import org.apache.kafka.common.serialization.{Deserializer, Serde, Serdes, Serializer}
+import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 5/22/17.

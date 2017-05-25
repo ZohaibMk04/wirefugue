@@ -1,7 +1,7 @@
 package edu.uw.at.iroberts.pcap
 
 import akka.util.ByteString
-import org.apache.kafka.common.serialization.{Serdes, Serializer}
+import org.apache.kafka.common.serialization.Serializer
 
 import scala.collection.mutable.ArrayBuffer
 

@@ -3,7 +3,7 @@ package edu.uw.at.iroberts.pcap
 import akka.stream._
 import akka.stream.stage.{GraphStage, GraphStageLogic, InHandler, OutHandler}
 import akka.util.ByteString
-import PcapFileRaw._
+import edu.uw.at.iroberts.pcap.PcapFileRaw._
 
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 4/3/17.

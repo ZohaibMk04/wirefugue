@@ -13,7 +13,7 @@ import edu.uw.at.iroberts.pcap._
 import edu.uw.at.iroberts.pcap.kafkaproducer.KafkaKey
 import edu.uw.at.iroberts.pcap.overlay.{Ethernet, IPV4Datagram}
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.{ByteArraySerializer, StringSerializer}
+import org.apache.kafka.common.serialization.ByteArraySerializer
 
 /**
   * Created by scala on 5/20/17.
