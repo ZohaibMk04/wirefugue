@@ -1,10 +1,11 @@
 package edu.uw.at.iroberts.pcap.kafkaproducer
 
+import java.util
+
 import edu.uw.at.iroberts.pcap.Protocol
 import edu.uw.at.iroberts.pcap.overlay.{IPV4Datagram, TCPSegment, UDPDatagram}
 import edu.uw.at.iroberts.pcap.ByteSeqOps._
-
-import org.apache.kafka.common.serialization.Serializer
+import org.apache.kafka.common.serialization.{Deserializer, Serde, Serdes, Serializer}
 
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 5/22/17.
@@ -22,6 +23,24 @@ object KafkaKey {
     override def close() = { /* Nothing to do */ }
 
     override def serialize(topic: String, key: KafkaKey): Array[Byte] = key.serialize
+  }
+
+  val deserializer = new Deserializer[KafkaKey] {
+    override def configure(configs: java.util.Map[String, _], isKey: Boolean) = {
+      /* Nothing to do */
+    }
+
+    override def close() = { /* Nothing to do */ }
+
+    override def deserialize(topic: String, data: Array[Byte]): KafkaKey =
+      KafkaKey(wrapByteArray(data).getInt32BE)
+  }
+
+  val serde = new Serde[KafkaKey] {
+    override def configure(configs: java.util.Map[String, _], isKey: Boolean) = ()
+    override val close = ()
+    override val serializer = KafkaKey.serializer
+    override val deserializer = KafkaKey.deserializer
   }
 
   def fromIPV4Datagram(packet: IPV4Datagram): KafkaKey = {
