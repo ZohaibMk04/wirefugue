@@ -1,4 +1,4 @@
-#WireFugue
+# WireFugue
 
 A scalable intrusion detection system based on Akka, Kafka, and Play.
 
@@ -43,13 +43,13 @@ Information displayed will include:
 ## Featured Technologies
 - Akka actors and streams for filtering and event generation at sensor hosts
 - Kafka for multiplexing packet and event data from sensors and distributing to analysis and storage hosts
-- Vaadin for front-end display and charts
-- Scaladin for facilitating Vaadin development in Scala
+- Play for front-end management and monitoring
 
 In the previous course we implemented a parser and analyzer for libpcap capture
 files. This work should provide a stepping-stone to live and historical network
 analysis.
 
+### Why Kafka
 We chose Apache Kafka as an enabling technology for the following reasons:
 
 - Kafka fits the reactive paradigm (event-driven, scalable, fault-tolerant ...)
@@ -70,6 +70,7 @@ We chose Apache Kafka as an enabling technology for the following reasons:
 Analysts will have the ability to specify basic filters to apply to network sensors. Analysis hosts can
 also tune filters to "shunt" benign data from the analysis system to reduce analysis load.
 
+### Other Considerations
 
 Sources of network data:
 
