@@ -30,8 +30,8 @@ object Main extends App {
     implicit val system = ActorSystem("stream-producer-system", config)
     implicit val materializer = ActorMaterializer()
 
-    //val producerSettings = ProducerSettings(system, KafkaKey.serializer, new ByteArraySerializer)
-    val producerSettings = ProducerSettings(system, KafkaKey.serializer, new StringSerializer)
+    val producerSettings = ProducerSettings(system, KafkaKey.serializer, new ByteArraySerializer)
+    //val producerSettings = ProducerSettings(system, KafkaKey.serializer, new StringSerializer)
       .withBootstrapServers("localhost:9092,localhost:9093,localhost:9094")
 
     FileIO.fromPath(Paths.get(args(0)))
@@ -47,8 +47,8 @@ object Main extends App {
             IPV4Datagram(e.payload)
         }
       .alsoTo(Sink.foreach(println))
-      //.map( dg => new ProducerRecord[KafkaKey, Array[Byte]]("packets", KafkaKey.fromIPV4Datagram(dg), dg.bytes.toArray))
-      .map( dg => new ProducerRecord[KafkaKey, String]("packets", KafkaKey.fromIPV4Datagram(dg), dg.toString))
+      .map( dg => new ProducerRecord[KafkaKey, Array[Byte]]("packets", KafkaKey.fromIPV4Datagram(dg), dg.bytes.toArray))
+      //.map( dg => new ProducerRecord[KafkaKey, String]("packets", KafkaKey.fromIPV4Datagram(dg), dg.toString))
       .alsoTo(Producer.plainSink(producerSettings))
       .runWith(Sink.onComplete { _ => system.terminate() })
   }
