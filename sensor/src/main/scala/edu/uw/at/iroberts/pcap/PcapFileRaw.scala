@@ -1,5 +1,7 @@
 package edu.uw.at.iroberts.pcap
 
+import java.nio.ByteOrder
+
 import akka.util.ByteString
 
 import scala.util.{Failure, Success, Try}
@@ -18,7 +20,7 @@ object PcapFileRaw {
   object Magic {
     def tryParse(bytes: ByteString): Try[Magic] = {
       import ByteSeqOps._
-      implicit val endianness = Endianness.Little
+      implicit val byteOrder = ByteOrder.LITTLE_ENDIAN
       require(bytes.length == 4)
       bytes.getInt32 match {
         case 0xa1b2c3d4 => Success(NormalMagic)
@@ -28,9 +30,9 @@ object PcapFileRaw {
     }
 
   }
-  trait Magic { def endianness: Endianness }
-  case object NormalMagic extends Magic { val endianness = Endianness.Little }
-  case object SwabMagic extends Magic { val endianness = Endianness.Big }
+  trait Magic { def byteOrder: ByteOrder }
+  case object NormalMagic extends Magic { val byteOrder = ByteOrder.LITTLE_ENDIAN }
+  case object SwabMagic extends Magic { val byteOrder = ByteOrder.BIG_ENDIAN }
 
   /** LinkType, parsed from the UInt32 pcaprec_hdr_s.network
     * field, tells us what sort of data follows pcaprec_hdr_s.
@@ -87,7 +89,7 @@ object PcapFileRaw {
     if (bytes.length < pcapHeaderSizeBytes) None
     else {
       val magic = Magic.tryParse(bytes.take(4)).get // Throws RE
-      implicit val endianness: Endianness = magic.endianness
+      implicit val byteOrder: ByteOrder = magic.byteOrder
 
       val versionMajor: Int = bytes.drop(4).getUInt16
       val versionMinor: Int = bytes.drop(6).getUInt16
@@ -111,7 +113,7 @@ object PcapFileRaw {
   }
 
   def tryParsePacketHeader(bytes: IndexedSeq[Byte])
-                          (implicit endianness: Endianness): Option[PacketHeader] = {
+                          (implicit byteOrder: ByteOrder): Option[PacketHeader] = {
     import ByteSeqOps._
 
     Some(

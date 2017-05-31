@@ -1,5 +1,7 @@
 package edu.uw.at.iroberts.pcap
 
+import java.nio.ByteOrder
+
 import akka.util.ByteString
 
 
@@ -29,7 +31,7 @@ object EthernetFrame {
   def parse(bytes: ByteString): EthernetFrame = {
     require(bytes.length >= headerLength)
     import ByteSeqOps._
-    implicit val endianness = Endianness.Big
+    implicit val byteOrder = ByteOrder.BIG_ENDIAN
 
     EthernetFrame(
       destinationMAC = MACAddress(bytes.slice(0, 6)),

@@ -96,7 +96,7 @@ class PcapFileParserRaw private() extends GraphStage[FlowShape[ByteString, PcapM
               }
             case ExpectPacketHeader(pch) =>
               val (bytes, rest) = buffer.splitAt(packetHeaderSizeBytes)
-              implicit val endianness = pch.magicNumber.endianness
+              implicit val byteOrder = pch.magicNumber.byteOrder
               tryParsePacketHeader(bytes) foreach { ph: PacketHeader =>
                 buffer = rest
                 // Call ourselves to handle the packet data now

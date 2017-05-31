@@ -1,5 +1,8 @@
 package edu.uw.at.iroberts.pcap
 
+import java.nio.ByteOrder
+import java.nio.ByteOrder.{BIG_ENDIAN, LITTLE_ENDIAN}
+
 import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -19,12 +22,6 @@ import scala.collection.mutable.ArrayBuffer
   *
   * Created by Ian Robertson <iroberts@uw.edu> on 4/3/17.
   */
-
-sealed trait Endianness
-object Endianness {
-  case object Big extends Endianness
-  case object Little extends Endianness
-}
 
 object ByteSeqOps {
   implicit def toByteSeqOps[A <: IndexedSeq[Byte]](bytes: A): ByteSeqOps[A] =
@@ -68,11 +65,10 @@ class ByteSeqOps[A <: IndexedSeq[Byte]](bytes: A) {
     builder.result()
   }
 
-  def getUInt32(implicit endianness: Endianness): Long = {
-    import Endianness._
-    endianness match {
-      case Big => this.getUInt32BE
-      case Little => this.getUInt32LE
+  def getUInt32(implicit byteOrder: ByteOrder): Long = {
+    byteOrder match {
+      case BIG_ENDIAN => this.getUInt32BE
+      case LITTLE_ENDIAN => this.getUInt32LE
     }
   }
 
@@ -86,11 +82,10 @@ class ByteSeqOps[A <: IndexedSeq[Byte]](bytes: A) {
     unsignedIntToSignedLong(getInt32BE)
   }
 
-  def getInt32(implicit endianness: Endianness): Int = {
-    import Endianness._
-    endianness match {
-      case Little => getInt32LE
-      case Big => getInt32BE
+  def getInt32(implicit byteOrder: ByteOrder): Int = {
+    byteOrder match {
+      case LITTLE_ENDIAN => getInt32LE
+      case BIG_ENDIAN => getInt32BE
     }
   }
 
@@ -108,22 +103,20 @@ class ByteSeqOps[A <: IndexedSeq[Byte]](bytes: A) {
       (bytes(3).toInt & 0xff)
   }
 
-  def getUInt16(implicit endianness: Endianness): Int = {
-    import Endianness._
-    endianness match {
-      case Little => getUInt16LE
-      case Big => getUInt16BE
+  def getUInt16(implicit byteOrder: ByteOrder): Int = {
+    byteOrder match {
+      case LITTLE_ENDIAN => getUInt16LE
+      case BIG_ENDIAN => getUInt16BE
     }
   }
 
   def getUInt16LE: Int = ((bytes(1).toInt & 0xff) << 8) | (bytes(0).toInt & 0xff)
   def getUInt16BE: Int = ((bytes(0).toInt & 0xff) << 8) | (bytes(1).toInt & 0xff)
 
-  def getInt16(implicit endianness: Endianness): Short = {
-    import Endianness._
-    endianness match {
-      case Little => getInt16LE
-      case Big => getInt16BE
+  def getInt16(implicit byteOrder: ByteOrder): Short = {
+    byteOrder match {
+      case LITTLE_ENDIAN => getInt16LE
+      case BIG_ENDIAN => getInt16BE
     }
   }
 

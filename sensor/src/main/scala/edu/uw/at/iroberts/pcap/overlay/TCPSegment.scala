@@ -1,7 +1,8 @@
 package edu.uw.at.iroberts.pcap.overlay
 
+import java.nio.ByteOrder
+
 import edu.uw.at.iroberts.pcap.ByteSeqOps._
-import edu.uw.at.iroberts.pcap.Endianness
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 5/22/17.
   */
@@ -18,7 +19,7 @@ case class TCPSegment(bytes: IndexedSeq[Byte]) {
     val NS = Value(0x100)
   }
   import TcpFlagMask._
-  implicit val endianness = Endianness.Big
+  implicit val byteOrder = ByteOrder.BIG_ENDIAN
   def sport: Short = bytes.slice(0, 2).getInt16
   def dport: Short = bytes.slice(2, 4).getInt16
   def seqN: Int = bytes.slice(4, 8).getInt32 // UNSIGNED
