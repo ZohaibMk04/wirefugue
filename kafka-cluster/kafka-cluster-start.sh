@@ -8,8 +8,6 @@ fi
 
 cd $KAFKA_HOME
 
-PIDS=
-
 stop_all() {
     trap "exit 0" HUP INT QUIT TERM
     bin/kafka-server-stop.sh
