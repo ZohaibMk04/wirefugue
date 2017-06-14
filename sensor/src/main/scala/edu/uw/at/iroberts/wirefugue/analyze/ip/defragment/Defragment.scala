@@ -11,7 +11,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable.SortedMap
 
 /**
-  * Created by scala on 5/30/17.
+  * Created by Ian Robertson <iroberts@uw.edu> on 5/30/17.
   */
 object Defragment extends GraphStage[FlowShape[IPV4Datagram, IPV4Datagram]] {
   val in = Inlet[IPV4Datagram]("fragmented-packets-in")
@@ -20,7 +20,6 @@ object Defragment extends GraphStage[FlowShape[IPV4Datagram, IPV4Datagram]] {
   override val shape = FlowShape.of(in, out)
 
   override def createLogic(attrs: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
-    type FragmentKey = (IPAddress, IPAddress, Short)
     var defragger: Map[(IPAddress, IPAddress, Short), Actor] = ???
 
     // For each packet received:
@@ -31,12 +30,6 @@ object Defragment extends GraphStage[FlowShape[IPV4Datagram, IPV4Datagram]] {
 
   }
 }
-
-case class FragmentKey(
-                      src: IPAddress,
-                      dst: IPAddress,
-                      id: Short
-                      )
 
 class Defragger(key: FragmentKey, sender: ActorRef) extends Actor {
   private var dataLength: Option[Int] = None

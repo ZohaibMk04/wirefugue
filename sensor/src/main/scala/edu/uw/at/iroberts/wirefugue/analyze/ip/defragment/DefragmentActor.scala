@@ -9,14 +9,8 @@ import scala.annotation.tailrec
 import scala.collection.SortedMap
 
 /**
-  * Created by scala on 6/10/17.
+  * Created by Ian Robertson <iroberts@uw.edu> on 6/10/17.
   */
-
-case class FragmentKey(
-                      src: IPAddress,
-                      dst: IPAddress,
-                      id: Short
-                      )
 
 class DefragmentActor(key: FragmentKey, sender: ActorRef) extends Actor {
   private var dataLength: Option[Int] = None
