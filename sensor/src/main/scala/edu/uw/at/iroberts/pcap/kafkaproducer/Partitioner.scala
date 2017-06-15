@@ -38,7 +38,7 @@ trait DefaultPacketHashStrategy extends PacketHashStrategy {
   }
 }
 
-object IPv4Partitioner extends SimplePartitioner with DefaultPacketHashStrategy {
+class IPv4Partitioner extends SimplePartitioner with DefaultPacketHashStrategy {
 
   def partition(topic: String,
                       key: Option[Any],
@@ -72,7 +72,7 @@ object IPv4Partitioner extends SimplePartitioner with DefaultPacketHashStrategy 
 
     val hash = hashPacket(dg.protocol, dg.src, dg.dest, sport.toShort, dport.toShort)
 
-    partitions.get(hash % nPartitions).partition()
+    partitions.get((hash & Integer.MAX_VALUE) % nPartitions).partition()
   }
 
 }
