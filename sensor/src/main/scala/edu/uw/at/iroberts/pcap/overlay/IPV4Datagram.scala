@@ -46,12 +46,40 @@ case class IPV4Datagram(bytes: IndexedSeq[Byte]) extends Overlay {
   def options: IndexedSeq[Byte] = bytes.slice(20, ihl * 4)
   def data: IndexedSeq[Byte] = bytes.slice(ihl * 4, bytes.length)
 
+  // These are useful in the toString method, but probably shouldn't
+  // be part of the API here.
+
+  private[overlay] def sourcePort: Option[Short] =
+    if (offset == 0 && data.length >= 2)
+      Protocol.fromByte(protocol) match {
+        case Protocol.TCP => Some(TCPSegment(data).sport)
+        case Protocol.UDP => Some(UDPDatagram(data).sport)
+        case _ => None
+      }
+    else None
+
+  private[overlay] def destPort: Option[Short] =
+    if (offset == 0 && data.length >= 4 )
+      Protocol.fromByte(protocol) match {
+        case Protocol.TCP => Some(TCPSegment(data).dport)
+        case Protocol.UDP => Some(UDPDatagram(data).dport)
+        case _ => None
+      }
+    else None
+
   override def toString = {
+
+    def portStr(maybePort: Option[Short]): String =
+      maybePort match {
+        case Some(port) => ":" + port
+        case _ => ""
+      }
 
     val protoStr = f"proto ${Protocol.fromByte(protocol).name} (0x$protocol%02x)"
     val ttlSigned = ttl.toInt & 0xff
 
-    s"$src > $dest, IPv$version length $totalLength, ttl $ttlSigned, $protoStr [${data.length} bytes]"
+    s"$src${portStr(sourcePort)} > $dest${portStr(destPort)}, " +
+      s"IPv$version length $totalLength, ttl $ttlSigned, $protoStr [${data.length} bytes]"
   }
 }
 
