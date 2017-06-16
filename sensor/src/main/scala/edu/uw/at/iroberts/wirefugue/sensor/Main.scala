@@ -8,10 +8,10 @@ import akka.kafka.scaladsl.Producer
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{FileIO, Sink}
 import com.typesafe.config.ConfigFactory
-import edu.uw.at.iroberts.pcap.PcapFileRaw.LinkType
-import edu.uw.at.iroberts.pcap._
-import edu.uw.at.iroberts.pcap.kafkaproducer.KafkaKey
-import edu.uw.at.iroberts.pcap.overlay.{Ethernet, IPV4Datagram}
+import edu.uw.at.iroberts.wirefugue.pcap.PcapFileRaw.LinkType
+import edu.uw.at.iroberts.wirefugue.pcap._
+import edu.uw.at.iroberts.wirefugue.kafka.producer.KafkaKey
+import edu.uw.at.iroberts.wirefugue.protocol.overlay.{Ethernet, IPV4Datagram}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.ByteArraySerializer
 

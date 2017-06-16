@@ -4,8 +4,8 @@ import akka.actor.{Actor, ActorRef}
 import akka.stream.{Attributes, FlowShape, Inlet, Outlet}
 import akka.stream.stage.{GraphStage, GraphStageLogic}
 import akka.util.{ByteString, ByteStringBuilder}
-import edu.uw.at.iroberts.pcap.{IPAddress, InternetChecksum}
-import edu.uw.at.iroberts.pcap.overlay.IPV4Datagram
+import edu.uw.at.iroberts.wirefugue.pcap.{IPAddress, InternetChecksum}
+import edu.uw.at.iroberts.wirefugue.protocol.overlay.IPV4Datagram
 
 import scala.annotation.tailrec
 import scala.collection.immutable.SortedMap
