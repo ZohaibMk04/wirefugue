@@ -71,7 +71,7 @@ case class IPV4Datagram(bytes: IndexedSeq[Byte]) extends Overlay {
 
     def portStr(maybePort: Option[Short]): String =
       maybePort match {
-        case Some(port) => ":" + port
+        case Some(port) => ":" + (port.toInt & 0xffff)
         case _ => ""
       }
 
