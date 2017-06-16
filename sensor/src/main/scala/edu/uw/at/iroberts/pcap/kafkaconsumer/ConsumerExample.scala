@@ -4,12 +4,11 @@ import akka.actor.ActorSystem
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.{Keep, Sink}
 import com.typesafe.config.ConfigFactory
 import edu.uw.at.iroberts.pcap.kafkaproducer.KafkaKey
 import edu.uw.at.iroberts.pcap.overlay.IPV4Datagram
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
-import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 
 import scala.concurrent.Await
@@ -30,16 +29,20 @@ object ConsumerExample extends App {
     .withGroupId("group1")
     .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
-  val partition = 1
-  val offset: Long = 0
+  // Separate streams for each partition
+  val maxPartitions = 100
+  val consumerGroup = Consumer.plainPartitionedSource(consumerSettings, Subscriptions.topics("packets"))
 
-  val subscription = Subscriptions.assignmentWithOffset(
-    new TopicPartition("packets", partition) -> offset
-  )
-  val done =
-    Consumer.plainSource(consumerSettings, subscription)
-      .map(rec => IPV4Datagram(rec.value()))
-      .runWith(Sink.foreach(println))
+  val done = consumerGroup.map {
+    case (topicPartition, source) =>
+      val p: Int = topicPartition.partition
+      source
+        .map { (cr: ConsumerRecord[KafkaKey, Array[Byte]]) => IPV4Datagram(cr.value()) }
+        .toMat(Sink.foreach(dg => println(s"[$p] $dg")))(Keep.both)
+        .run()
+  }
+    .mapAsyncUnordered(maxPartitions)(_._2)
+    .runWith(Sink.ignore)
 
   Await.result(done, Duration.Inf)
 
