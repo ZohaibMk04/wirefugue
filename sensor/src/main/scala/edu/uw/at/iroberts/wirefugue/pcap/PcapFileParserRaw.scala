@@ -48,14 +48,14 @@ class PcapFileParserRaw private() extends GraphStage[FlowShape[ByteString, PcapM
       // The next 24 bytes in the buffer should be the global
       // header of a pcap dump file.
       case object ExpectPcapHeader extends State {
-        override val bytesNeeded = pcapHeaderSizeBytes
+        val bytesNeeded = pcapHeaderSizeBytes
       }
       // The next 16 bytes should encode a PacketHeader. We hold on to
       // this and advance to
       // the next state after learning the number of bytes included
       // in the PacketData, which follow the PacketHeader.
       case class ExpectPacketHeader(fileContext: PcapHeader) extends State {
-        override val bytesNeeded = packetHeaderSizeBytes
+        val bytesNeeded = packetHeaderSizeBytes
       }
       // The PacketHeader specifies the number of bytes included in the PacketData.
       // If we read all the expected bytes, we yield a Packet.
@@ -67,7 +67,7 @@ class PcapFileParserRaw private() extends GraphStage[FlowShape[ByteString, PcapM
           throw new RuntimeException(s"pcaprec_hdr_s.incl_len is too large! ($len).")
         else if (len < 0)
           throw new RuntimeException(s"pcaprec_hdr_s.incl_len is less than 0! ($len).")
-        override val bytesNeeded = len
+        val bytesNeeded = len
       }
 
       // Our current state; start by expecting the global file header
