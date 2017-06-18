@@ -4,7 +4,7 @@ import java.nio.file.Paths
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{FileIO, Sink}
+import akka.stream.scaladsl.Sink
 import akka.testkit.{ImplicitSender, TestKit}
 import edu.uw.at.iroberts.wirefugue.pcap.PcapFileRaw._
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
@@ -24,14 +24,11 @@ class PcapFileParserSpec(_system: ActorSystem) extends TestKit(_system) with Imp
   implicit val materializer = ActorMaterializer()
   val uri = getClass.getResource("/http.cap").toURI
   val filePath = Paths.get(uri)
-  //val filePath = Paths.get("sensor/src/main/resources/http.cap")
 
   "A graph" should {
     "be able to sum the number of packets in http.cap" in {
-      val sumF = FileIO.fromPath(filePath)
-        .via(PcapFileParserRaw())
-        .collect { case p: RawPacket => 1 }
-        .runWith(Sink.fold(0)(_ + _))
+      val sumF = PcapSource(uri)
+        .runWith(Sink.fold(0)((acc, _) => acc + 1))
 
       val sum = Await.result(sumF, 10 seconds)
 
@@ -39,10 +36,8 @@ class PcapFileParserSpec(_system: ActorSystem) extends TestKit(_system) with Imp
     }
     "be able to sum the number of payload bytes in http.cap" in {
 
-      val sumF = FileIO.fromPath(filePath)
-        .via(PcapFileParserRaw())
-        .collect { case p: RawPacket => p.packetBytes.length }
-        .runWith(Sink.fold(0: Long)(_ + _))
+      val sumF = PcapSource(uri)
+        .runWith(Sink.fold(0: Long)((acc, packet) => acc + packet.data.length))
 
       val sum = Await.result(sumF, 10 seconds)
 
@@ -50,9 +45,7 @@ class PcapFileParserSpec(_system: ActorSystem) extends TestKit(_system) with Imp
     }
     "be able to produce a set of all IP endpoints from the packets in http.cap" in {
       val ipsF: Future[Set[IPAddress]] =
-        FileIO.fromPath(filePath)
-          .via(PcapFileParserRaw())
-          .via(PcapFileParser())
+        PcapSource(uri)
           .collect {
             case pkt: Packet if pkt.network == LinkType.ETHERNET =>
               EthernetFrame.parse(pkt.data)
@@ -74,7 +67,7 @@ class PcapFileParserSpec(_system: ActorSystem) extends TestKit(_system) with Imp
       " a big-endian capture file with linux netlink headers" in {
       val uri = getClass.getResource("/nlmon-big.pcap").toURI
       val sumF: Future[Long] =
-        PcapFileParser.fromPath(Paths.get(uri))
+        PcapSource(uri)
           .map { _.originalLength }
           .runWith(Sink.fold(0: Long)(_ + _))
 
