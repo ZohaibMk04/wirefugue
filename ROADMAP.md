@@ -2,22 +2,21 @@
 
 ## sensor
 - detects raw capture data from: pcap file [DONE], pcap pipe [DONE]
-- produces kafka messages
-- partitions the kafka messages in a sensible and balanced manner
-- partitions such that whole tcp streams can be read from a single partition
+- produces kafka messages [DONE]
+- partitions the kafka messages in a sensible and balanced manner [DONE]
+- partitions such that whole tcp streams can be read from a single partition [DONE]
 - [WISHLIST] defragments ip packets (necessary to determine kafka partition because port info 
 only in first fragment)
-- [WISHLIST]
 
 ## analysis "agents"
 - consumes messages from various kafka streams in real time
 - produces new streams, including higher-level event streams [what events?]
 - detects "strange" standalone packets (bad header info, weird flags)
-- [WISHLIST] defragments ip
 - reassembles tcp
 - publishes individual tcp streams as streams in their own right
 - request/response (latency) analysis
 - detects site-wide scans by analyzing events from many different streams
+- [WISHLIST] defragments ip
 - [WISHLIST] decodes http entities
 - [WISHLIST] detects content within http entities
 - [WISHLIST] uses a machine-learning model to infer the threat level for various types of traffic
