@@ -3,6 +3,7 @@ package edu.uw.at.iroberts.wirefugue.pcap
 import java.time.Instant
 
 import akka.util.ByteString
+import edu.uw.at.iroberts.wirefugue.Timestamped
 import edu.uw.at.iroberts.wirefugue.pcap.PcapFileRaw.LinkType
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 4/9/17.
@@ -23,3 +24,10 @@ case class Packet(
                     originalLength: Int,
                     data: ByteString
                  )
+
+object Packet {
+  implicit object PacketsAreTimestamped extends Timestamped[Packet] {
+    def toMillis(p: Packet): Long = p.timestamp.toEpochMilli
+  }
+}
+
