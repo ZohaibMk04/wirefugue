@@ -6,8 +6,7 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream._
 import akka.stream.scaladsl.{Flow, Sink}
-import akka.stream.stage.GraphStage
-import edu.uw.at.iroberts.wirefugue.pcap.{Packet, PcapSource}
+import edu.uw.at.iroberts.wirefugue.pcap.{Packet, PcapSource, Timestamp}
 
 import scala.collection.mutable
 import scala.concurrent.Await
@@ -36,23 +35,103 @@ object LivePacketCount {
     }
   }
 
-  def PacketMetricsGenerator(attributes: WindowAttributes): Flow[Packet, AggregatePacketData, NotUsed] =
-    Flow[Packet].statefulMapConcat { () =>
+  // Window specified as [from, until) in epoch milliseconds
+  type Window = (Long, Long)
+
+
+  // (Aggregates are monoids with a window)
+  trait Aggregator[Event, Result] {
+    type Builder
+
+    def empty: Builder
+    def append: Builder => Event => Builder
+    def result: Builder => Result
+    def withWindow(w: Window): Builder => Builder
+  }
+
+  object PacketAggregator extends Aggregator[Packet with Timestamp, AggregatePacketData] {
+    type Builder = AggregatePacketData
+
+    def empty = AggregatePacketData((0L, 0L), 0, 0)
+    def append = (b) => (p: Packet with Timestamp) => AggregatePacketData(b.w, b.numPackets + 1, b.numBytes + p.data.length)
+    def result = identity
+    def withWindow(window: Window) = (b) => b.copy(w = window)
+  }
+
+  trait Timestamped[E] {
+    def toMillis(e: E): Long
+  }
+
+  implicit object PacketsAreTimestamped extends Timestamped[Packet] {
+    def toMillis(p: Packet): Long = p.timestamp.toEpochMilli
+  }
+
+  def PacketMetricsGenerator(attributes: WindowAttributes): Flow[Packet with Timestamp, AggregatePacketData, NotUsed] =
+    MetricsAggregator[Packet with Timestamp, AggregatePacketData](attributes)(PacketAggregator)
+
+
+  def MetricsAggregator[E : Timestamped, R]
+  (attributes: WindowAttributes)
+  (aggregator: Aggregator[E, R]): Flow[E, R, NotUsed] = {
+
+    sealed trait WindowCommand {
+      def w: Window
+    }
+
+    case class OpenWindow(w: Window) extends WindowCommand
+    case class CloseWindow(w: Window) extends WindowCommand
+    case class AddToWindow(ev: E, w: Window) extends WindowCommand
+
+    class CommandGenerator(attributes: WindowAttributes) {
+      private var watermark = 0L
+      private val openWindows = mutable.Set[Window]()
+
+      def forEvent(ev: E): List[WindowCommand] = {
+        val ts: Long = implicitly[Timestamped[E]].toMillis(ev)
+        watermark = math.max(watermark, ts - attributes.maxDelay.toMillis)
+        if (ts < watermark) {
+          println(s"Dropping event with timestamp: ${tsToString(ts)}")
+          Nil
+        } else {
+          val eventWindows = attributes.windowsFor(ts)
+
+          val closeCommands = openWindows.flatMap { ow =>
+            if (!eventWindows.contains(ow) && ow._2 < watermark) {
+              openWindows.remove(ow)
+              Some(CloseWindow(ow))
+            } else None
+          }
+
+          val openCommands = eventWindows.flatMap { w =>
+            if (!openWindows.contains(w)) {
+              openWindows.add(w)
+              Some(OpenWindow(w))
+            } else None
+          }
+
+          val addCommands = eventWindows.map(w => AddToWindow(ev, w))
+
+          openCommands.toList ++ closeCommands.toList ++ addCommands.toList
+        }
+      }
+    }
+
+
+    Flow[E].statefulMapConcat { () =>
       val generator = new CommandGenerator(attributes)
-      p => generator.forPacket(p)
+      p => generator.forEvent(p)
     }.groupBy(100, command => command.w)
       .takeWhile(!_.isInstanceOf[CloseWindow])
-      .fold(AggregatePacketData((0L, 0L), 0, 0)) {
-        case (agg, OpenWindow(window)) => agg.copy(w = window)
+      .fold(aggregator.empty) {
+        case (b, OpenWindow(window)) => aggregator.withWindow(window)(b)
         // always filtered out by takeWhile
-        case (agg, CloseWindow(_)) => agg
-        case (agg, AddToWindow(ev, _)) => agg.copy(
-          numPackets = agg.numPackets + 1,
-          numBytes = agg.numBytes + ev.data.length
-        )
+        case (b, CloseWindow(_)) => b
+        case (b, AddToWindow(ev, _)) => aggregator.append(b)(ev)
       }
+        .map(aggregator.result)
       .async
       .mergeSubstreams
+  }
 
 
   def main(args: Array[String]): Unit = {
@@ -60,7 +139,7 @@ object LivePacketCount {
     implicit val materializer = ActorMaterializer()
 
     val windowAttributes = WindowAttributes(
-      windowSize = 10 seconds,
+      windowSize = 1 seconds,
       windowStep = 1 second,
       maxDelay = 5 seconds
     )
@@ -77,50 +156,6 @@ object LivePacketCount {
       println(s"$total events total.")
     }
     finally system.terminate()
-  }
-
-  // Window specified as [from, until) in epoch milliseconds
-  type Window = (Long, Long)
-
-  sealed trait WindowCommand {
-    def w: Window
-  }
-
-  case class OpenWindow(w: Window) extends WindowCommand
-  case class CloseWindow(w: Window) extends WindowCommand
-  case class AddToWindow(p: Packet, w: Window) extends WindowCommand
-
-  class CommandGenerator(attributes: WindowAttributes) {
-    private var watermark = 0L
-    private val openWindows = mutable.Set[Window]()
-
-    def forPacket(p: Packet): List[WindowCommand] = {
-      watermark = math.max(watermark, p.timestamp.toEpochMilli - attributes.maxDelay.toMillis)
-      if (p.timestamp.toEpochMilli < watermark) {
-        println(s"Dropping event with timestamp: ${tsToString(p.timestamp.toEpochMilli)}")
-        Nil
-      } else {
-        val eventWindows = attributes.windowsFor(p.timestamp.toEpochMilli)
-
-        val closeCommands = openWindows.flatMap { ow =>
-          if (!eventWindows.contains(ow) && ow._2 < watermark) {
-            openWindows.remove(ow)
-            Some(CloseWindow(ow))
-          } else None
-        }
-
-        val openCommands = eventWindows.flatMap { w =>
-          if (!openWindows.contains(w)) {
-            openWindows.add(w)
-            Some(OpenWindow(w))
-          } else None
-        }
-
-        val addCommands = eventWindows.map(w => AddToWindow(p, w))
-
-        openCommands.toList ++ closeCommands.toList ++ addCommands.toList
-      }
-    }
   }
 
   case class AggregatePacketData(w: Window, numPackets: Long, numBytes: Long) {
