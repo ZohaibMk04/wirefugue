@@ -9,6 +9,8 @@ import scala.concurrent.duration._
 
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 6/23/17.
+  *
+  * Inspired by https://softwaremill.com/windowing-data-in-akka-streams/
   */
 object TimestampedWindowAggregator {
   case class WindowAttributes(
