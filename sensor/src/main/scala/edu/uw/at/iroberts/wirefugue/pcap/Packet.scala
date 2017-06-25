@@ -26,8 +26,11 @@ case class Packet(
                  )
 
 object Packet {
+  import edu.uw.at.iroberts.wirefugue.Timestamped
+
+  /** Packet is an instance of Timestamped */
   implicit object PacketsAreTimestamped extends Timestamped[Packet] {
-    def toMillis(p: Packet): Long = p.timestamp.toEpochMilli
+    def timestamp(p: Packet) = p.timestamp
   }
 }
 

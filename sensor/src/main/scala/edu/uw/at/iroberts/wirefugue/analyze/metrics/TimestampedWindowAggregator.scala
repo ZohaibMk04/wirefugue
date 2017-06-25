@@ -56,10 +56,10 @@ object TimestampedWindowAggregator {
       private val openWindows = mutable.Set[Window]()
 
       def forEvent(ev: E): List[WindowCommand] = {
-        val ts: Long = implicitly[Timestamped[E]].toMillis(ev)
+        val ts: Long = implicitly[Timestamped[E]].timestamp(ev).toEpochMilli
         watermark = math.max(watermark, ts - attributes.maxDelay.toMillis)
         if (ts < watermark) {
-          println(s"Dropping event with timestamp: ${implicitly[Timestamped[E]].toString()}")
+          println(s"Dropping event with timestamp: ${implicitly[Timestamped[E]].timestamp(ev)}")
           Nil
         } else {
           val eventWindows = attributes.windowsFor(ts)
