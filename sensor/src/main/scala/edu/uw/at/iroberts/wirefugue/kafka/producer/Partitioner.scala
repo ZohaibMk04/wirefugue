@@ -25,16 +25,10 @@ trait DefaultPacketHashStrategy extends PacketHashStrategy {
     val p1 = 2 ^ 13 - 1
     val p2 = 2 ^ 17 - 1
     val p3 = 2 ^ 19 - 1
-    // FIXME: This hash algorithm collides on unrelated flows
-    // when source and destination ports are swapped, e.g.:
-    // 10.0.0.1:12345 -> 192.168.0.1:80
-    // and
-    // 10.0.0.1:80 -> 192.168.0.1:12345
-    // hash to the same value. In practice this seems unlikely
-    // to produce many collisions.
+
     protocol * p1 +
-      (src.bytes.getInt32BE ^ dest.bytes.getInt32BE) * p2 +
-      (sport ^ dport) * p3
+      (src.bytes.getInt32BE * p2 + sport * p3) +
+      (dest.bytes.getInt32BE * p2 + dport * p3)
   }
 }
 
