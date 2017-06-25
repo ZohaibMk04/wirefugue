@@ -7,6 +7,8 @@ import edu.uw.at.iroberts.wirefugue.pcap.ByteSeqOps._
   * Created by Ian Robertson <iroberts@uw.edu> on 5/22/17.
   */
 object TCPSegment {
+  val minSize = 20
+
   object TcpFlagMask extends Enumeration {
     val FIN = Value(0x1)
     val SYN = Value(0x2)
@@ -21,6 +23,7 @@ object TCPSegment {
 }
 
 case class TCPSegment(bytes: IndexedSeq[Byte]) extends Overlay {
+  require(bytes.length >= TCPSegment.minSize)
 
   case class TCPFlags(asInt: Int) {
     import TCPSegment.TcpFlagMask._

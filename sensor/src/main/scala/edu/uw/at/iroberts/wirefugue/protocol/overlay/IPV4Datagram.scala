@@ -9,6 +9,8 @@ import edu.uw.at.iroberts.wirefugue.pcap.{IPAddress, Protocol}
   * Created by Ian Robertson <iroberts@uw.edu> on 5/22/17.
   */
 object IPV4Datagram {
+  val minSize = 20
+
   object Flag {
     val MF: Int = 0x01
     val DF: Int = 0x02

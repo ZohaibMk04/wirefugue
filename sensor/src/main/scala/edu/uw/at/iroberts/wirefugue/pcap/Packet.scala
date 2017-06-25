@@ -3,8 +3,8 @@ package edu.uw.at.iroberts.wirefugue.pcap
 import java.time.Instant
 
 import akka.util.ByteString
-import edu.uw.at.iroberts.wirefugue.Timestamped
 import edu.uw.at.iroberts.wirefugue.pcap.PcapFileRaw.LinkType
+import edu.uw.at.iroberts.wirefugue.protocol.overlay.{Ethernet, IPV4Datagram, TCPSegment}
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 4/9/17.
   */
@@ -23,7 +23,20 @@ case class Packet(
                     network: LinkType.Value,
                     originalLength: Int,
                     data: ByteString
-                 )
+                 ) {
+  def ip: Option[IPV4Datagram] = this match {
+    case Packet(_, LinkType.ETHERNET, _, eth)
+      if eth.length >= Ethernet.minSize =>
+      Some(IPV4Datagram(Ethernet(eth).bytes))
+    case _ => None
+  }
+
+  def tcp: Option[TCPSegment] = for {
+    ip <- this.ip
+    if ip.protocol == Protocol.TCP.value && ip.data.length >= TCPSegment.minSize
+  } yield TCPSegment(ip.data)
+
+}
 
 object Packet {
   import edu.uw.at.iroberts.wirefugue.Timestamped
