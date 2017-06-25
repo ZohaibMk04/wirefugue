@@ -41,7 +41,7 @@ case class TCPSegment(bytes: IndexedSeq[Byte]) extends Overlay {
   def sport: Short = bytes.slice(0, 2).getInt16
   def dport: Short = bytes.slice(2, 4).getInt16
   def sequenceNumber: Int = bytes.slice(4, 8).getInt32 // UNSIGNED
-  def acknowlegementNumber: Int = bytes.slice(8, 12).getInt32 // UNSIGNED
+  def acknowledgementNumber: Int = bytes.slice(8, 12).getInt32 // UNSIGNED
   def dataOffset: Byte = (bytes(12) >>> 4).toByte
   def flags: TCPFlags = TCPFlags(bytes.slice(12, 14).getInt16 & 0x01ff)
   def windowSize: Short = bytes.slice(14, 16).getInt16 // UNSIGNED
