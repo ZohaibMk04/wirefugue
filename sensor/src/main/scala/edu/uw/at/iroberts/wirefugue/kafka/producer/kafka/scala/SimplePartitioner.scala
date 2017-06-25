@@ -28,9 +28,9 @@ trait SimplePartitioner extends producer.Partitioner {
                         ): Int = partition(
     topic,
     Option(key),
-    Option(keyBytes.toIndexedSeq),
+    Option(keyBytes).map(_.toIndexedSeq),
     Option(value),
-    Option(valueBytes.toIndexedSeq),
+    Option(valueBytes).map(_.toIndexedSeq),
     cluster
   )
 }
