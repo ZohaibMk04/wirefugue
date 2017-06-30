@@ -79,11 +79,6 @@ object PcapFileRaw {
   def parseMagic(bytes: ByteString): Magic =
     Magic.tryParse(bytes).get
 
-  //def swab32(bytes: ByteString): ByteString = bytes.swab32
-  def getUInt32BE(bytes: ByteString): Long = bytes.getUInt32BE
-  def getUInt32LE(bytes: ByteString): Long = bytes.getUInt32LE
-  def getInt32LE(bytes: ByteString): Int = bytes.getInt32LE
-
   def tryParsePcapHeader(bytes: ByteString): Option[PcapHeader] = {
     require(bytes.length == pcapHeaderSizeBytes)
     if (bytes.length < pcapHeaderSizeBytes) None
