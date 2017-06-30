@@ -14,8 +14,8 @@ object PcapFileDemo extends App {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
 
-  FileIO.fromPath(Paths.get("src/main/resources/http.cap"))
-    .via(PcapFileParserRaw())
+  FileIO.fromPath(Paths.get("src/main/resources/bigFlows.pcap"))
+    .via(PcapFileParserRawFlow())
     // .alsoTo(Sink.foreach(println))
     .via(PcapFileParser())
     .via(PacketLineFormatter())

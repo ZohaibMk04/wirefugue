@@ -41,7 +41,7 @@ object PcapFileParser {
     Flow.fromGraph(new PcapFileParser).via(g)
   def fromPath(path: Path): Source[Packet, Future[IOResult]] =
     FileIO.fromPath(path).
-      viaMat(PcapFileParserRaw())(Keep.left).
+      viaMat(PcapFileParserRawFlow())(Keep.left).
       viaMat(PcapFileParser())(Keep.left)
 }
 
@@ -108,12 +108,11 @@ object PcapFileParserDemo extends App {
   import akka.stream.ActorMaterializer
   import akka.stream.scaladsl._
 
-
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
 
-  FileIO.fromPath(Paths.get("src/main/resources/http.cap"))
-    .via(PcapFileParserRaw())
+  val ioF = FileIO.fromPath(Paths.get("sensor/src/main/resources/bigFlows.pcap"))
+    .via(PcapFileParserRawFlow())
     .via(PcapFileParser())
     .alsoTo(Sink.foreach(println))
     .runWith(Sink.onComplete { _ => system.terminate() })

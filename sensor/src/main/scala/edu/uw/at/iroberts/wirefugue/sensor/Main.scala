@@ -35,7 +35,7 @@ object Main extends App {
       .withBootstrapServers("localhost:9092,localhost:9093,localhost:9094")
 
     FileIO.fromPath(Paths.get(args(0)))
-      .via(PcapFileParserRaw())
+      .via(PcapFileParserRawFlow())
       // .alsoTo(Sink.foreach(println))
       .via(PcapFileParser())
         .collect {

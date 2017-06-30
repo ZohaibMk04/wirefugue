@@ -15,7 +15,7 @@ object PcapSource {
   def apply(uri: URI): Source[Packet, Future[IOResult]] = {
     val filePath = Paths.get(uri)
     FileIO.fromPath(filePath)
-      .via(PcapFileParserRaw())
+      .via(PcapFileParserRawFlow())
       .via(PcapFileParser())
   }
 
