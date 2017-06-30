@@ -34,13 +34,23 @@ object LivePacketCount {
       maxDelay = 5 seconds
     )
 
-    val aggregator = new Aggregator[Packet, AggregatePacketData] {
-      type Builder = AggregatePacketData
+    case class AggregatePacketData(w: Window, numPackets: Long, numBytes: Long, averagePacketSize: Double) {
+      def tsToString(ts: Long) = Instant.ofEpochMilli(ts).toString
+      override def toString =
+        s"${tsToString(w._1)} => ${tsToString(w._2)}: $numPackets packets, $numBytes bytes, avg: $averagePacketSize"
+    }
 
-      def empty = AggregatePacketData((0L, 0L), 0, 0)
-      def append = (b) => (p: Packet) => AggregatePacketData(b.w, b.numPackets + 1, b.numBytes + p.data.length)
-      def result = identity
-      def withWindow(window: Window) = (b) => b.copy(w = window)
+    case class Accumulator(window: Window, nPackets: Long, nBytes: Long) {
+      def result = AggregatePacketData(window, nPackets, nBytes, nBytes.toDouble / nPackets )
+    }
+
+    val aggregator = new Aggregator[Packet, AggregatePacketData] {
+      type Builder = Accumulator
+
+      def empty = Accumulator((0L, 0L), 0, 0)
+      def append = (b) => (p: Packet) => Accumulator(b.window, b.nPackets + 1, b.nBytes + p.data.length)
+      def result = (b) => b.result
+      def withWindow(window: Window) = (b) => b.copy(window = window)
     }
 
     val uri = getClass.getResource("/bigFlows.pcap").toURI
@@ -56,12 +66,6 @@ object LivePacketCount {
       println(s"$total events total.") //
     }
     finally system.terminate()
-  }
-
-  case class AggregatePacketData(w: Window, numPackets: Long, numBytes: Long) {
-    def tsToString(ts: Long) = Instant.ofEpochMilli(ts).toString
-    override def toString =
-      s"Between ${tsToString(w._1)} and ${tsToString(w._2)}, there were $numPackets packets and $numBytes bytes."
   }
 
 
