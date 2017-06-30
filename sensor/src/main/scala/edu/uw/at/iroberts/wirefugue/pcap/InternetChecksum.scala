@@ -1,9 +1,8 @@
 package edu.uw.at.iroberts.wirefugue.pcap
 
-import akka.util.ByteString
-
-/**
-  * Created by scala on 5/18/17.
+/** Methods to compute and validate RFC 1071 Internet checksums.
+  *
+  * Created by Ian Robertson <iroberts@uw.edu> on 5/18/17.
   */
 object InternetChecksum {
   def onesSum(data: IndexedSeq[Byte]): Short = {
@@ -27,18 +26,11 @@ object InternetChecksum {
 
   // Results in the one's complement of onesSum(data) as a 16-bit integer,
   // which is the value that should be placed in the checksum field.
+  // If the checksum field is part of the data, it should be set to 0
+  // before calculating the checksum.
   def internetChecksum(data: IndexedSeq[Byte]): Short = (~onesSum(data)).toShort
-}
 
-object InternetChecksumDemo extends App {
-  import InternetChecksum._
-  val data: IndexedSeq[Byte] = ByteString.fromInts(
-    0x00, 0x01, 0xf2, 0x03,
-    0xf4, 0xf5, 0xf6, 0xf7
-  )
-
-  val sum = internetChecksum(data)
-  val ones = onesSum(data)
-  println(f"sum = 0x$sum%04x")
-  println(f"ones = 0x$ones%04x")
+  // When a zeroed field included in the sum is replaced by a valid checksum,
+  // the checksum of the data will be 0.
+  def checksumValid(data: IndexedSeq[Byte]): Boolean = internetChecksum(data) == 0
 }
