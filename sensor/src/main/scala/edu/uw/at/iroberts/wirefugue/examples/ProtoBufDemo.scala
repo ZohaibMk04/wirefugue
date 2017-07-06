@@ -14,6 +14,12 @@ object ProtoBufDemo extends App {
   )
 
   import edu.uw.at.iroberts.wirefugue.pcap.ByteSeqOps._
-  println(p.toByteArray.toIndexedSeq.mkHexBlock())
+
+  val bytes: IndexedSeq[Byte] = p.toByteArray.toIndexedSeq
+  println(bytes.mkHexBlock())
+
+  val p2: Person = Person.parseFrom(bytes.toArray)
+
+  println(p2)
 
 }
