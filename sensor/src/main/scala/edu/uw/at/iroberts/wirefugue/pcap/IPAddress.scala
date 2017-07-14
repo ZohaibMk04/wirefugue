@@ -1,25 +1,28 @@
 package edu.uw.at.iroberts.wirefugue.pcap
 
-import akka.util.ByteString
+import java.net.{Inet4Address, InetAddress}
 
-/** Represents a 4-byte IPv4 address
+/** Represents an Internet Protocol version 4 address
   *
-  * @param bytes
+  * @param inet4Address a java.net.Inet4Address
   */
-case class IPAddress(bytes: IndexedSeq[Byte]) {
-  require(bytes.length == 4)
-  override def toString = {
-    bytes.map(_.toInt & 0xff).mkString(".")
-  }
+case class IPAddress(inet4Address: Inet4Address) {
+
+  def bytes: IndexedSeq[Byte] = inet4Address.getAddress.toIndexedSeq
+
+  override def toString = inet4Address.getHostAddress
 }
 
 object IPAddress {
-  /* Warning: this does no checking to make sure the string
-   * represents a sane IP address. In particular values outside
-   * of 0-255 are incorporated modulo 256. It is intended only
-   * to help make tests easier to write.
-   */
-  def apply(s: String): IPAddress = this(
-    ByteString(s.split("\\.").map(Integer.parseInt): _*)
-  )
+
+  def apply(s: String): IPAddress = {
+    val ints = s.split("\\.").map(Integer.parseInt)
+    require( ints.forall(i => i >= 0 && i <= 255) )
+    this(ints.map(_.toByte))
+  }
+
+  def apply(bytes: Seq[Byte]): IPAddress = {
+    require(bytes.length == 4)
+    IPAddress(InetAddress.getByAddress(bytes.toArray).asInstanceOf[Inet4Address])
+  }
 }
