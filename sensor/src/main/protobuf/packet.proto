@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+package edu.uw.at.iroberts.wirefugue.protobufs;
+
+option java_package = "edu.uw.at.iroberts.wirefugue.protobufs";
+option java_outer_classname = "PacketProtos";
+
+message Packet {
+    optional fixed64 sensor_ts_epoch_nanos = 2;
+    optional uint32 sensor_id = 3;
+    optional uint32 sensor_group_id = 4;
+    optional uint32 original_length = 5;
+    optional uint32 link_type = 6;
+    optional bytes data = 1;
+}
+
+message IPv4PacketKey {
+    optional fixed64 epoch_nanos = 1;
+    optional uint32 protocol = 2;
+    optional fixed32 sourceAddress = 3;
+    optional uint32 sourcePort = 4;
+    optional fixed32 destinationAddress = 5;
+    optional uint32 destinationPort = 6;
+}
