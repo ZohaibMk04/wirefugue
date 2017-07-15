@@ -24,8 +24,10 @@ libraryDependencies ++= {
 
     "com.google.protobuf" % "protobuf-java" % protobufVersion,
 
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+    "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test",
+    "net.manub" %% "scalatest-embedded-kafka" % "0.15.0" % "test"
   )
 
 }
