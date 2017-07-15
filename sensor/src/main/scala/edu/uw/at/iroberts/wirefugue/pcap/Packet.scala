@@ -26,7 +26,7 @@ case class Packet(
                  ) {
   def ip: Option[IPV4Datagram] = this match {
     case Packet(_, LinkType.ETHERNET, _, eth)
-      if eth.length >= Ethernet.minSize =>
+      if eth.length >= Ethernet.minSize && Ethernet(eth).etherType == EtherType.IPv4.id =>
       Some(IPV4Datagram(Ethernet(eth).payload))
     case _ => None
   }
