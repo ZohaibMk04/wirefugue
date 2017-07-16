@@ -11,5 +11,5 @@ case class PacketKey(
                     sourceIP: IPAddress,
                     sourcePort: Short,
                     destinationIP: IPAddress,
-                    destionationPort: Short
+                    destinationPort: Short
                     ) extends Serializable
