@@ -3,12 +3,7 @@ package edu.uw.at.iroberts.wirefugue.kafka.producer.kafka.scala
 import org.apache.kafka.clients.producer
 import org.apache.kafka.common.Cluster
 
-/** An adapter trait useful for defining stateless partitioners
-  * in Scala. configure() and close() are predefined as no-ops
-  * and the partition() method can (and must) be defined using
-  * Option instead of nulls, and IndexedSeq[Byte] instead of
-  * Array[Byte].
-  *
+/**
   * Created by Ian Robertson <iroberts@uw.edu> on 6/15/17.
   */
 trait SimplePartitioner extends producer.Partitioner {

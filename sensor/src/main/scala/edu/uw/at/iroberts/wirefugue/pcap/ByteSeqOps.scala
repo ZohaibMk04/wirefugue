@@ -125,8 +125,7 @@ class ByteSeqOps[A <: IndexedSeq[Byte]](bytes: A) {
 
 
   def mkHexString: String = bytes.map(b => f"$b%02x").grouped(2).map(_.mkString("")).mkString(" ")
-
-  private[pcap] def mkHexLines: Iterator[String] = {
+  def mkHexLines: Iterator[String] = {
     bytes.grouped(16).map(_.mkHexString)
   }
   def mkHexBlock(indent: Int = 8): String = {
