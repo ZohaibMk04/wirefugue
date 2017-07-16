@@ -27,7 +27,7 @@ libraryDependencies ++= {
     "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
     "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test",
-    "net.manub" %% "scalatest-embedded-kafka" % "0.15.0" % "test"
+    "net.manub" %% "scalatest-embedded-kafka" % "0.14.0" % "test"
   )
 
 }
