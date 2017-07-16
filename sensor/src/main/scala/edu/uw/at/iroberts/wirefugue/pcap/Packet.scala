@@ -3,6 +3,7 @@ package edu.uw.at.iroberts.wirefugue.pcap
 import java.time.Instant
 
 import akka.util.ByteString
+import edu.uw.at.iroberts.wirefugue.kafka.serdes.PacketKey
 import edu.uw.at.iroberts.wirefugue.pcap.PcapFileRaw.LinkType
 import edu.uw.at.iroberts.wirefugue.protocol.overlay.{Ethernet, IPV4Datagram, TCPSegment}
 /**
@@ -36,6 +37,21 @@ case class Packet(
     if ip.protocol == Protocol.TCP.value && ip.data.length >= TCPSegment.minSize
   } yield TCPSegment(ip.data)
 
+  def key: PacketKey = PacketKey(
+    protocol = ip.map(_.protocol).getOrElse(0),
+    sourceIP = ip.map(_.src).getOrElse(IPAddress("0.0.0.0")),
+    sourcePort = tcp.map(_.sport).getOrElse(0),
+    destinationIP = ip.map(_.dest).getOrElse(IPAddress("0.0.0.0")),
+    destinationPort = tcp.map(_.dport).getOrElse(0)
+  )
+
+  override def toString = this match {
+    case Packet(ts, LinkType.ETHERNET, _, eth) =>
+      ts.toString + " " +
+        ip.map(_.toString).getOrElse("") + " " +
+        tcp.map(_.toString).getOrElse("")
+    case _ => "[Non-ethernet packet]"
+  }
 }
 
 object Packet {
