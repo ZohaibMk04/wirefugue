@@ -1,11 +1,13 @@
 package edu.uw.at.iroberts.wirefugue.kafka.producer
 
+import edu.uw.at.iroberts.wirefugue.kafka.serdes.PacketKey
 import edu.uw.at.iroberts.wirefugue.pcap.{IPAddress, Protocol}
 import edu.uw.at.iroberts.wirefugue.protocol.overlay.{IPV4Datagram, TCPSegment, UDPDatagram}
 import kafka.scala.SimplePartitioner
 import org.apache.kafka.common.Cluster
-
 import edu.uw.at.iroberts.wirefugue.pcap.ByteSeqOps._
+
+import scala.util.hashing.{Hashing, MurmurHash3}
 
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 6/15/17.
@@ -30,6 +32,23 @@ trait DefaultPacketHashStrategy extends PacketHashStrategy {
       (src.bytes.getInt32BE * p2 + sport * p3) +
       (dest.bytes.getInt32BE * p2 + dport * p3)
   }
+}
+
+trait MurmurHash3PacketHashStrategy extends PacketHashStrategy {
+  def hashPacket(protocol: Byte, src: IPAddress, dest: IPAddress, sport: Short, dport: Short): Int = {
+    MurmurHash3.productHash(
+      protocol ->
+      MurmurHash3.unorderedHash(Seq(
+        MurmurHash3.productHash(src -> sport),
+        MurmurHash3.productHash(dest -> dport)
+      ))
+    )
+  }
+}
+
+trait PacketKeyProvidedHashStrategy extends PacketHashStrategy {
+  def hashPacket(protocol: Byte, src: IPAddress, dest: IPAddress, sport: Short, dport: Short): Int =
+    PacketKey(protocol, src, sport, dest, dport).##
 }
 
 class IPv4Partitioner extends SimplePartitioner with DefaultPacketHashStrategy {

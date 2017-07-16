@@ -81,8 +81,8 @@ class Defragger(key: FragmentKey, sender: ActorRef) extends Actor {
         newPacket(7) = (newPacket(7) & ~0x20).toByte
         newPacket(10) = 0
         newPacket(11) = 0
-        // FIXME bad idea to _.take on a java.lang.Array?
-        val checksum = InternetChecksum.internetChecksum(newPacket.take(headerBytes))
+        // Avoid copying the buffer when calculating the checksum
+        val checksum = InternetChecksum.internetChecksum( newPacket.view(0, headerBytes) )
         newPacket(10) = (checksum >>> 8).toByte
         newPacket(11) = checksum.toByte
 
