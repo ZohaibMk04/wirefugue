@@ -53,6 +53,10 @@ object LivePacketCount {
       def withWindow(window: Window) = (b) => b.copy(window = window)
     }
 
+    // FIXME: bigFlows.pcap is over 350MB in size and as such it is not included in the
+    // repository. It is available (and described) at
+    // http://tcpreplay.appneta.com/wiki/captures.html#bigflow-pcap
+    // Perhaps this test could be specified as a docker image.
     val uri = getClass.getResource("/bigFlows.pcap").toURI
     val f = PcapSource(uri)
         .via(TimestampedWindowAggregator(windowAttributes, aggregator))

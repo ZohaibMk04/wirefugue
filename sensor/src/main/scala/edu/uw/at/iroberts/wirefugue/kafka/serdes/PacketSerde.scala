@@ -25,7 +25,7 @@ class PacketDeserializer extends Deserializer[Packet] with StatelessDeserializer
         case Some(nanos) => Instant.ofEpochSecond(0, nanos)
         case _ => throw new RuntimeException("Packet has no timestamp")
       },
-      network = PcapFileRaw.LinkType.ETHERNET,
+      network = PcapFileRaw.LinkType.ETHERNET, // TODO: don't assume link type
       originalLength = pp.data match {
         case Some(bytes) => bytes.size
         case _ => throw new RuntimeException("Packet has no data")
