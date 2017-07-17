@@ -2,6 +2,7 @@ package edu.uw.at.iroberts.wirefugue.protocol.overlay
 
 import java.nio.ByteOrder
 
+import edu.uw.at.iroberts.wirefugue.pcap.ByteSeqOps
 import edu.uw.at.iroberts.wirefugue.pcap.ByteSeqOps._
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 5/22/17.
@@ -52,4 +53,47 @@ case class TCPSegment(bytes: IndexedSeq[Byte]) extends Overlay {
   def urgentPointer: Short = bytes.slice(18, 20).getInt16 // UNSIGNED
   def options: IndexedSeq[Byte] = bytes.slice(20, dataOffset * 4)
   def data: IndexedSeq[Byte] = bytes.drop(dataOffset * 4)
+
+  /**
+    * Format segment in a fashion similar to tcpdump lines, e.g.:
+    * Flags [P.], seq 290230800:290232180, ack 951058419, win 6432, length 1380
+    *
+    * Port numbers are expected to be displayed by the IP formatter
+    *
+    * @return a human-readable string of TCP header info
+    */
+  override def toString: String = {
+    /*
+     * FIXME: this does not take into account truncated packets. Length values
+     * and sequence end values will be incorrect for packets larger than snapLen.
+     */
+    val dataLength = data.length
+
+    val flagPart: Option[String] = Some("Flags " + Seq(
+      if (flags.syn) "S" else "",
+      if (flags.psh) "P" else "",
+      if (flags.fin) "F" else "",
+      if (flags.rst) "R" else "",
+      if (flags.ack) "." else ""
+    ).mkString("[", "", "]"))
+
+    val seqPart: Option[String] = if (flags.syn || flags.fin || dataLength > 0) {
+      val seqVal = ByteSeqOps.unsignedIntToSignedLong(sequenceNumber)
+      val end = seqVal + dataLength
+      val endStr = if (dataLength > 0) s":$end" else ""
+      Some(s"seq $seqVal$endStr")
+    }
+    else None
+
+    val ackPart: Option[String] =
+      if (flags.ack) Some("ack " + ByteSeqOps.unsignedIntToSignedLong(acknowledgementNumber))
+      else None
+
+    val winPart: Option[String] = Some("win " + ByteSeqOps.unsignedShortToSignedInt(windowSize))
+
+    val lenPart: Option[String] = Some("length " + dataLength)
+
+    val parts: Seq[String] = Seq(flagPart, seqPart, ackPart, winPart, lenPart).flatten
+    parts.mkString(", ")
+  }
 }
