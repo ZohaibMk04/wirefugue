@@ -7,6 +7,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import akka.testkit.{ImplicitSender, TestKit}
 import edu.uw.at.iroberts.wirefugue.pcap.PcapFileRaw._
+import edu.uw.at.iroberts.wirefugue.protocol.overlay.{Ethernet, IPV4Datagram}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.concurrent.duration._
@@ -23,7 +24,6 @@ class PcapFileParserSpec(_system: ActorSystem) extends TestKit(_system) with Imp
 
   implicit val materializer = ActorMaterializer()
   val uri = getClass.getResource("/http.cap").toURI
-  val filePath = Paths.get(uri)
 
   "A graph" should {
     "be able to sum the number of packets in http.cap" in {
@@ -48,11 +48,14 @@ class PcapFileParserSpec(_system: ActorSystem) extends TestKit(_system) with Imp
         PcapSource(uri)
           .collect {
             case pkt: Packet if pkt.network == LinkType.ETHERNET =>
-              EthernetFrame.parse(pkt.data)
+              Ethernet(pkt.data)
           }
-          .collect(Datagram.fromFrame)
-        .mapConcat((dg: Datagram) => Set(dg.sourceIP, dg.destinationIP))
-        .runFold(Set[IPAddress]())(_ + _)
+          .collect {
+            case e@Ethernet(_) if e.etherType == EtherType.IPv4.id =>
+              IPV4Datagram(e.payload)
+          }
+              .mapConcat((dg: IPV4Datagram) => Set(dg.src, dg.dest))
+              .runFold(Set[IPAddress]())(_ + _)
 
       val ips: Set[IPAddress] = Await.result(ipsF, 10 seconds)
 
