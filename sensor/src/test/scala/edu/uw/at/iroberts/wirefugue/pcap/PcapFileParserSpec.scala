@@ -7,7 +7,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import akka.testkit.{ImplicitSender, TestKit}
 import edu.uw.at.iroberts.wirefugue.pcap.PcapFileRaw._
-import edu.uw.at.iroberts.wirefugue.protocol.overlay.{Ethernet, IPV4Datagram}
+import edu.uw.at.iroberts.wirefugue.protocol.overlay.{EtherType, Ethernet, IPV4Datagram}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.concurrent.duration._

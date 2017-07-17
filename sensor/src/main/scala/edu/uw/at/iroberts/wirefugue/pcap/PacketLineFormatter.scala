@@ -2,7 +2,7 @@ package edu.uw.at.iroberts.wirefugue.pcap
 
 import akka.stream.scaladsl.Flow
 import edu.uw.at.iroberts.wirefugue.pcap.PcapFileRaw.LinkType
-import edu.uw.at.iroberts.wirefugue.protocol.overlay.Ethernet
+import edu.uw.at.iroberts.wirefugue.protocol.overlay.{EtherType, Ethernet}
 
 /** A hacky way to print packets.
   * Works best iff:
@@ -17,7 +17,7 @@ object PacketLineFormatter {
     val rcvdLength: Long = p.originalLength
     val maybeFrame = p.network match {
       case LinkType.ETHERNET =>
-        if (p.data.length >= EthernetFrame.headerLength)
+        if (p.data.length >= Ethernet.minSize)
           Some(Ethernet(p.data))
         else
           None

@@ -1,6 +1,7 @@
 package edu.uw.at.iroberts.wirefugue.pcap
 
 import akka.util.ByteString
+import edu.uw.at.iroberts.wirefugue.protocol.overlay.EtherType
 import org.apache.kafka.common.serialization.Serializer
 
 import scala.collection.mutable.ArrayBuffer

@@ -3,15 +3,10 @@ package edu.uw.at.iroberts.wirefugue.pcap
 import java.nio.ByteOrder
 
 import akka.util.ByteString
+import edu.uw.at.iroberts.wirefugue.protocol.overlay.EtherType
 
 
-object EtherType extends Enumeration {
-  val IPv4 = Value(0x0800)
-  val IPv6 = Value(0x86dd)
-  val ARP = Value(0x0806)
-  // TODO: Add more EtherType values
-  def other(i: Int): EtherType.Value = Value(i)
-}
+
 
 case class EthernetFrame(
                           destinationMAC: MACAddress,
@@ -28,18 +23,5 @@ case class EthernetFrame(
 
 object EthernetFrame {
   val headerLength = 14
-  def parse(bytes: ByteString): EthernetFrame = {
-    require(bytes.length >= headerLength)
-    import ByteSeqOps._
-    implicit val byteOrder = ByteOrder.BIG_ENDIAN
-
-    EthernetFrame(
-      destinationMAC = MACAddress(bytes.slice(0, 6)),
-      sourceMAC = MACAddress(bytes.slice(6, 12)),
-      etherType = EtherType(bytes.slice(12, 14).getUInt16),
-      payload = bytes.drop(14)
-    )
-  }
-
 }
 

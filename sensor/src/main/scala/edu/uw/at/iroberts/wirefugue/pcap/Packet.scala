@@ -5,7 +5,7 @@ import java.time.Instant
 import akka.util.ByteString
 import edu.uw.at.iroberts.wirefugue.kafka.serdes.PacketKey
 import edu.uw.at.iroberts.wirefugue.pcap.PcapFileRaw.LinkType
-import edu.uw.at.iroberts.wirefugue.protocol.overlay.{Ethernet, IPV4Datagram, TCPSegment}
+import edu.uw.at.iroberts.wirefugue.protocol.overlay.{EtherType, Ethernet, IPV4Datagram, TCPSegment}
 /**
   * Created by Ian Robertson <iroberts@uw.edu> on 4/9/17.
   */
