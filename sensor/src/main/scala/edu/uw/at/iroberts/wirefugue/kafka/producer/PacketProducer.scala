@@ -14,7 +14,7 @@ import scala.concurrent.Future
   * Created by Ian Robertson <iroberts@uw.edu> on 7/1/17.
   */
 object PacketProducer {
-  def plainSink(topic: String, producerSettings: ProducerSettings[Integer, ProtobufPacket]): Sink[Packet, Future[Done]] =
-  Flow[Packet].map( p => new ProducerRecord[Integer, ProtobufPacket](topic, p.key.##, packetToProtobufPacket(p)))
+  def plainSink(topic: String, producerSettings: ProducerSettings[Integer, Packet]): Sink[Packet, Future[Done]] =
+  Flow[Packet].map( p => new ProducerRecord[Integer, Packet](topic, p.key.##, p))
     .toMat(Producer.plainSink(producerSettings))(Keep.right)
 }
