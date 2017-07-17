@@ -2,6 +2,7 @@ package edu.uw.at.iroberts.wirefugue.pcap
 
 import akka.stream.scaladsl.Flow
 import edu.uw.at.iroberts.wirefugue.pcap.PcapFileRaw.LinkType
+import edu.uw.at.iroberts.wirefugue.protocol.overlay.Ethernet
 
 /** A hacky way to print packets.
   * Works best iff:
@@ -17,14 +18,14 @@ object PacketLineFormatter {
     val maybeFrame = p.network match {
       case LinkType.ETHERNET =>
         if (p.data.length >= EthernetFrame.headerLength)
-          Some(EthernetFrame.parse(p.data))
+          Some(Ethernet(p.data))
         else
           None
       case _ => None
     }
 
     val maybePacket = maybeFrame.flatMap { frame =>
-      if (frame.etherType == EtherType.IPv4 &&
+      if (frame.etherType == EtherType.IPv4.id &&
           frame.payload.length >= Datagram.headerLength)
         Some(Datagram.parse(frame.payload))
       else
