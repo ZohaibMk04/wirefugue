@@ -29,7 +29,7 @@ import scala.concurrent.Future
   * converting to UTC and the latter is sent along with
   * each emitted element.
   *
-  * TODO: Come up with a better name than "PacketContextualizer"
+  * TODO: This could be done more simply using Flow.statefulMapConcat
   */
 
 object PcapFileParser {
