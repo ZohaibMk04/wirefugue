@@ -8,8 +8,8 @@ import akka.kafka.{ConsumerSettings, ProducerSettings, Subscriptions}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import com.typesafe.config.ConfigFactory
-import edu.uw.at.iroberts.wirefugue.kafka.producer.{PacketProducer, _}
-import edu.uw.at.iroberts.wirefugue.kafka.serdes.protobuf
+import edu.uw.at.iroberts.wirefugue.kafka.producer.PacketProducer
+import edu.uw.at.iroberts.wirefugue.kafka.serdes.{PacketDeserializer, PacketSerializer}
 import edu.uw.at.iroberts.wirefugue.pcap.{Packet, PcapSource}
 import edu.uw.at.iroberts.wirefugue.protobufs.packet.{Packet => ProtobufPacket}
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
@@ -118,22 +118,22 @@ class PacketPassthruSpec extends FlatSpec with Matchers with EmbeddedKafka {
       val partitionsExpected = packets.groupBy(expectedPartitionForPacket)
 
       // Set up the producer and stream the packets to it
-      val producerSettings: ProducerSettings[Integer, ProtobufPacket] =
-        ProducerSettings(system, new IntegerSerializer(), new protobuf.PacketSerde().serializer())
+      val producerSettings: ProducerSettings[Integer, Packet] =
+        ProducerSettings(system, new IntegerSerializer, new PacketSerializer)
           .withBootstrapServers(kafkaEndpointString)
           .withProperty("partitioner.class", "org.apache.kafka.clients.producer.internals.DefaultPartitioner")
           .withProperty("value.serializer", "edu.uw.at.iroberts.kafka.serdes.protobuf.PacketSerde")
 
       val producerF = Source(packets)
-          .alsoTo(Sink.foreach(println))
+          //.alsoTo(Sink.foreach(println))
         .runWith(PacketProducer.plainSink(topicName, producerSettings))
 
       // Wait for the producer to finish
       Await.ready(producerF, 60 seconds)
 
       // Set up the consumer group
-      val consumerSettings: ConsumerSettings[Integer, ProtobufPacket] =
-        ConsumerSettings(system, new IntegerDeserializer, new protobuf.PacketSerde().deserializer())
+      val consumerSettings: ConsumerSettings[Integer, Packet] =
+        ConsumerSettings(system, new IntegerDeserializer, new PacketDeserializer)
           .withBootstrapServers(kafkaEndpointString)
           .withGroupId("group1")
           .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
@@ -149,7 +149,7 @@ class PacketPassthruSpec extends FlatSpec with Matchers with EmbeddedKafka {
             // tupled with the partition number
             val p: Int = topicPartition.partition
             source
-              .mapConcat[Packet] { (cr: ConsumerRecord[Integer, ProtobufPacket]) => protobufPacketToPacket(cr.value()).toList }
+              .mapConcat[Packet] { (cr: ConsumerRecord[Integer, Packet]) => List(cr.value()) }
               .toMat(Sink.seq)(Keep.right)
               .mapMaterializedValue(xs => p -> xs)
               .run() : (Int, Future[Seq[Packet]])
